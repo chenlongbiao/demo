@@ -19,6 +19,8 @@ public class Socket {
     public static Map<String, Session> sessionMap = new HashMap<String, Session>();
     private Session session ;
 
+
+
     @OnOpen
     public void startSocket(Session session) {
         this.session = session;
