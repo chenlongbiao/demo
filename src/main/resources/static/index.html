@@ -1,0 +1,141 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Test WebSocket</title>
+    <script type="text/javascript" src="js/jquery-1.11.3.js"></script>
+    <script type="text/javascript" >
+        $(function() {
+            var clickd = ""
+            var url = "ws://192.168.3.135:8081/websocket";
+            var ws = "";
+            var message ={"id":"","msg":"","from":"","to":""};
+            function connection() {
+                ws = new WebSocket(url);
+                console.log("connection.......");
+                ws.onmessage = function (e){
+                    var json = eval('(' +  e.data.toString() + ')');
+                    if (json.from) {
+                        showMessage(json.from +":"+ json.msg);
+                    }
+                    if (json.live){
+                        showMessage2(json.live)
+                    }
+                }
+                ws.onclose = function() {
+                    showMessage3("close");
+                }
+                ws.onerror = function (e){
+                    showMessage3("error");
+                }
+                ws.onopen = function() {
+                    showMessage3("链接成功")
+                    message.id = $(".identity").val();
+                    message.msg = "newUser";
+                    console.log(JSON.stringify(message));
+                    ws.send(JSON.stringify(message));
+                    message.msg = "";
+
+                }
+            }
+
+
+
+
+            $(".start-conn-btn").click(function() {
+                connection();
+            });
+            $(".send-btn").click(function() {//send message
+                console.log(clickd)
+                message.to = clickd;
+                message.msg = $(".msg-context").val();
+                $(".msg-context").val("");
+                ws.send(JSON.stringify(message));
+                showMessage( "我:" + message.msg );
+                message.msg = "";
+
+            });
+
+            function showMessage(msg) {
+                console.log(msg)
+                $(".show-message").append( msg + "<br/>");
+                $('.show-message').scrollTop( $('.show-message')[0].scrollHeight );
+
+            }
+            function showMessage3(msg) {
+                alert(msg)
+            }
+            function showMessage2(a) {
+                var strings = a.split(',');
+                var aaa = "";
+                for(var i=0; i< strings.length -1; i++){
+                    var string1 = strings[i];
+                    aaa += "<button class='sb' id="+string1+" >"+string1+"</button>";
+                }
+
+                $(".liveSpan").html(aaa)
+                for(var i=0; i< strings.length -1; i++){
+                    var lia= document.getElementsByClassName('sb')
+                    lia[i].onclick = function() {
+                        clickd = this.innerHTML
+                        console.log(this.innerHTML)
+                        $(".to-user").html(clickd)
+                    }
+                }
+
+            }
+        });
+
+    </script>
+    <style>
+        .liveDiv {
+            float: right;
+            width: 115px;
+        }
+        .liveSpan button{
+            margin: 5px;
+            width: 80px;
+        }
+        .container {
+            width: 500px;
+            height: 800px;
+            margin: 0 auto;
+        }
+        .send-btn {
+            width: 120px;
+            margin:100px 80px;
+        }
+        .show-message {
+            width: 100%;
+            height: 250px;
+            border: 1px solid red;
+            overflow: auto;
+        }
+    </style>
+</head>
+<body>
+<div class="liveDiv">
+    <p>当前在线用户</p>
+    <span class="liveSpan">
+        </span>
+</div>
+<div class="container">
+        <button class="start-conn-btn" >登录</button>
+    <div class="item">
+        <span>我的名字:</span>
+        <input type="text" class="identity">
+        <span style="margin-left: 50px">联系人:</span>
+        <span class="to-user"></span>
+    </div>
+    <div class="show-message">
+
+    </div>
+    <div calss="item">
+        <span>想说点啥:</span>
+        <textarea  class="msg-context"></textarea>
+    </div>
+    <button class="send-btn">发送</button>
+</div>
+</body>
+
+</html>
