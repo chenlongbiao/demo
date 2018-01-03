@@ -104,13 +104,20 @@
         }
         .send-btn {
             width: 120px;
-            margin:100px 80px;
+            margin:50px 180px;
         }
         .show-message {
             width: 100%;
             height: 250px;
             border: 1px solid red;
             overflow: auto;
+        }
+        .myname_span {
+            display: inline-block;
+            width: 130px;
+        }
+        .msg-context {
+            width: 100%;
         }
     </style>
 </head>
@@ -121,22 +128,29 @@
         </span>
 </div>
 <div class="container">
-        <button class="start-conn-btn" >登录</button>
     <div class="item">
         <span>我的名字:</span>
-        <input type="text" class="identity">
+        <span class="myname_span"></span>
         <span style="margin-left: 50px">联系人:</span>
         <span class="to-user"></span>
     </div>
     <div class="show-message">
 
     </div>
-    <div calss="item">
-        <span>想说点啥:</span>
+    <div class="item">
+        <p>想说点啥:</p>
         <textarea  class="msg-context"></textarea>
     </div>
-    <button class="send-btn">发送</button>
+    <button class="send-btn" onclick="send()">发送</button>
 </div>
+<script>
+    $(function () {
+        var item = sessionStorage.getItem("user");
+        var parse = JSON.parse(item);
+        $('.myname_span').html(parse.username)
+        console.log( parse)
+        connection(parse.username);
+    })
+</script>
 </body>
-
 </html>

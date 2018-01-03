@@ -1,11 +1,10 @@
     var clickd = "";
-    var username = "";
     var status = true;
     var baseUrl = "http://localhost:8081";
     var url = "ws://localhost:8081/websocket";
     var ws = "";
     var message ={"id":"","msg":"","from":"","to":""};
-    function connection() {
+    function connection(username) {
         ws = new WebSocket(url);
         console.log("connection.......");
         ws.onmessage = function (e){
@@ -19,14 +18,12 @@
         }
         ws.onclose = function() {
             status = false
-            showMessage3("close");
         }
         ws.onerror = function (e){
             status = false
-            showMessage3("error");
+            showMessage3("出问题了");
         }
         ws.onopen = function() {
-            showMessage3("链接成功")
             message.id = username;
             console.log(username)
             message.msg = "newUser";
@@ -53,6 +50,16 @@
         message.msg = "";
 
     });
+    function send() {//send message
+        console.log(clickd)
+        message.to = clickd;
+        message.msg = $(".msg-context").val();
+        $(".msg-context").val("");
+        ws.send(JSON.stringify(message));
+        showMessage( "我:" + message.msg );
+        message.msg = "";
+
+    }
 
     function showMessage(msg) {
         console.log(msg)
@@ -84,23 +91,21 @@
     }
     function login() {
         var val = $(".username").val();
+        username = val;
         $.ajax({
             type: "post",
             url: baseUrl+"/login",
             data: {name:$(".username").val(), password:$(".password").val()},
             dataType: "json",
             success: function(data){
-                console.log(success)
-                console.log(data)
+                console.log("success")
+                sessionStorage.setItem("user",JSON.stringify(data))
+                window.location.href="./index.html"
             },
             error: function (data) {
-                console.log(error)
+                console.log("error")
+                $('.msg_p').html("用户名或密码错误")
                 console.log(data)
             }
         });
-        username = val;
-        // connection();
-        // if (status) {
-        //     window.location.href="./index.html";
-        // }
     }

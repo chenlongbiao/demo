@@ -1,8 +1,16 @@
 package com.webchat.demo.socket;
 
 import com.google.gson.Gson;
+import com.webchat.demo.config.RedisConfig;
+import com.webchat.demo.service.interfaces.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
+import org.springframework.context.annotation.Configuration;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.ValueOperations;
 import org.springframework.stereotype.Component;
 
+import javax.annotation.Resource;
 import javax.websocket.OnMessage;
 import javax.websocket.OnOpen;
 import javax.websocket.Session;
@@ -12,14 +20,19 @@ import java.util.Date;
 import java.util.HashMap;
 import java.util.Map;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
-@ServerEndpoint(value = "/websocket")
-@Component
+//@Component
+//@ServerEndpoint(value = "/websocket")
 public class Socket {
     public static Map<String, Session> sessionMap = new HashMap<String, Session>();
     private Session session ;
 
+    @Resource
+    private RedisTemplate redisTemplate;
 
+    @Autowired
+    UserService userService;
 
     @OnOpen
     public void startSocket(Session session) {
@@ -52,13 +65,13 @@ public class Socket {
                     //将用户id放进去
                     sessionMap.put(msg.getId(), session);
                     //发送在线人数
-                    pubMessage(session);
+                    this.pubMessage(session);
                 } else {
                     Session toSession = sessionMap.get(msg.getTo());
                     if (toSession != null && toSession.isOpen()) {
                         toSession.getBasicRemote().sendText(gson.toJson(toMessage).toString(), last);
                         //发送在线人数
-                        pubMessage(toSession);
+                        this.pubMessage(toSession);
                     } else {
                         toMessage.setMsg("用户不存在");
                         toMessage.setFrom("系统");
@@ -77,7 +90,7 @@ public class Socket {
     }
 
 
-    private static void pubMessage(Session session) throws IOException {
+    private  void pubMessage(Session session) throws IOException {
         Set userIds = sessionMap.keySet();
         StringBuffer sBuffer  = new StringBuffer();
         for (Object str1 : userIds) {
@@ -87,5 +100,11 @@ public class Socket {
         Message message = new Message();
         message.setLive(sBuffer.toString());
         session.getBasicRemote().sendText(gson.toJson(message),true);
+
+
+        ValueOperations<String, Object> operations=redisTemplate.opsForValue();
+        operations.set("com.neox", 111);
+        operations.set("com.neo.f", 1,1, TimeUnit.SECONDS);
     }
+
 }
