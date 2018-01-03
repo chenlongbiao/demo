@@ -34,12 +34,13 @@
     function connect() {
         var url = 'http://localhost:8081/endpointSang'
         var socket = new SockJS(url);
-        console.log(url)
         stompClient = Stomp.over(socket);
+        console.log(Stomp)
         stompClient.connect({}, function (frame) {
             setConnected(true);
             console.log('Connected:' + frame);
             stompClient.subscribe('http://localhost:8081/topic/getResponse', function (response) {
+                console.log('Connected:' + 1111);
                 showResponse(JSON.parse(response.body).responseMessage);
             })
         });
